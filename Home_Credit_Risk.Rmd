@@ -1,0 +1,98 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(data.table)
+library(plotly)
+library(highcharter)
+library(dplyr)
+library(skimr)
+library(shiny)
+library(DescTools)
+library(gridExtra)
+```
+
+#![Data Diagram](c:/Zeno/R/HomeCreditRisk/DataDiagram.png)
+
+Import Data
+
+```{r}
+dir.root <- "c:/Zeno/R/HomeCreditRisk"
+
+data.apptrain <- fread(paste(dir.root,"Data/application_train.csv",sep="/"))
+data.bureau <- fread(paste(dir.root,"Data/bureau.csv",sep="/"))
+```
+
+
+```{r}
+data.apptrain %>% skim()
+```
+
+```{r}
+sort(round(colMeans(is.na(data.apptrain))*100,digits=2), decreasing=TRUE)
+```
+
+```{r}
+
+PlotFdist(data.apptrain$CNT_FAM_MEMBERS)
+data.apptrain$CNT_CHILDREN %>% PlotFdist()
+
+```
+
+
+```{r}
+p <- ggplot(data.apptrain, aes(x=DAYS_BIRTH*(-1/365))) +
+  stat_density(aes(group=TARGET,color=TARGET), position="identity", geom="line")
+p <- ggplotly(p) %>% layout(title="Density of Age by Target")
+p
+```
+
+```{r}
+occtype <- data.apptrain %>% group_by(OCCUPATION_TYPE) %>% summarize(total=n()) %>% arrange(desc(total)) %>% mutate(col=seq(from=length(unique(occtype$OCCUPATION_TYPE)),to=1,by=-1)
+       ,OCCUPATION_TYPE=ifelse(OCCUPATION_TYPE=="","Missing",OCCUPATION_TYPE)
+) 
+
+occtype.drill <- 
+
+h.tree <- hchart(occtype,"treemap",hcaes(x=OCCUPATION_TYPE
+                                          ,value=total
+                                          ,color=col
+                                          )) %>%
+  hc_title(text="Count of Occupation Types") %>%
+  hc_add_theme(hc_theme_db())
+
+fluidPage(
+  fluidRow(h.tree)
+  )
+
+```
+
+```{r}
+h1 <- hchart(density(data.apptrain$DAYS_BIRTH[data.apptrain$TARGET == 0] / -365)
+             ,type="area"
+             ,color="#ff9999"
+             ,name="Target = 0") %>%
+  hc_add_series(density(data.apptrain$DAYS_BIRTH[data.apptrain$TARGET == 1] / -365)
+             ,type="area"
+             ,color="#80aaff"
+             ,name="Target = 1") %>%
+  hc_title(text="Density Plot of Years Old")
+  
+#data.apptrain$DAYS_BIRTH[data.apptrain$TARGET == 0]
+ 
+fluidPage(
+  fluidRow(h1)
+) 
+```
+
+```{r}
+m
+```
+
+
+
+
+
+
